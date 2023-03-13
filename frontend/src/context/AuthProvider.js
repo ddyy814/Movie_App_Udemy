@@ -1,8 +1,8 @@
-import React, { createContext, useState } from 'react'
-import { signInUser } from '../api/auth';
+import React, { createContext, useEffect, useState } from 'react'
+import { getIsAuth, signInUser } from '../api/auth';
 
 
-const AuthContext = createContext();
+export const AuthContext = createContext();
 const defaultAuthInfo = {
     profile: null,
     isLoggedIn: false,
@@ -10,19 +10,41 @@ const defaultAuthInfo = {
     error: ''
 }
 
-export default function AuthProvider({children}) {
+export default function AuthProvider({ children }) {
 
-    const [authInfo, setAuthInfo] = useState({...defaultAuthInfo});
+    const [authInfo, setAuthInfo] = useState({ ...defaultAuthInfo });
 
     const handleLogin = async (email, password) => {
-        setAuthInfo({...authInfo, isPending: true});
-        const {error, user} = await signInUser({email, password});
-        if(error) {}
+        setAuthInfo({ ...authInfo, isPending: true });
+        const { error, user } = await signInUser({ email, password });
+        if (error) {
+            return setAuthInfo({ ...authInfo, isPending: false, error: error });
+        }
+        setAuthInfo({ profile: { ...user }, isPending: false, isLoggedIn: true, error: error });
+        localStorage.setItem('auth-token', user.token);
     }
 
-  return (
-    <AuthContext.Provider value={{authInfo, handleLogin, handleLogout, isAuth}}>
-        {children}
-    </AuthContext.Provider>
-  )
+    const isAuth = async () => {
+        const token = localStorage.getItem('auth-token');
+        if (!token) return;
+        setAuthInfo({ ...authInfo, isPending: true });
+        const { error, user } = await getIsAuth(token);
+        if (error) {
+            return setAuthInfo({ ...authInfo, isPending: false, error: error });
+        };
+
+        setAuthInfo({ profile: { ...user }, isPending: false, isLoggedIn: true, error: error });
+    }
+
+    useEffect(() => {
+        isAuth()
+    }, []);
+
+    // handleLogout
+
+    return (
+        <AuthContext.Provider value={{ authInfo, handleLogin, isAuth }}>
+            {children}
+        </AuthContext.Provider>
+    )
 }
