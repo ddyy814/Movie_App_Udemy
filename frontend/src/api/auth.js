@@ -3,7 +3,6 @@ import client from "./client";
 export const createUser = async (userInfo) => {
   try {
     const { data } = await client.post("/user/create", userInfo);
-
     return data;
   } catch (error) {
     const { response } = error;
@@ -41,9 +40,9 @@ export const getIsAuth = async (token) => {
   try {
     const { data } = await client.get("/user/is-auth", {
       headers: {
-        Authorization: 'Beare' + token,
-        accept: 'application/json'
-      }
+        Authorization: "Bearer " + token,
+        accept: "application/json",
+      },
     });
     return data;
   } catch (error) {

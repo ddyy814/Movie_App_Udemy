@@ -27,10 +27,9 @@ export default function EmailVerification() {
   const [activeOtpIndex, setActiveOtpIndex] = useState(0);
 
   const inputRef = useRef();
-  const {updateNotification} = useNotification
+  const { updateNotification } = useNotification();
 
   const { state } = useLocation();
-  console.log(state);
   const user = state?.user;
 
   const navigate = useNavigate();
@@ -67,7 +66,7 @@ export default function EmailVerification() {
     e.preventDefault();
 
     if (!isValidOTP(otp)) {
-      return updateNotification('error', "invalid OTP");
+      return updateNotification("error", "invalid OTP");
     }
 
     // submit otp
@@ -75,16 +74,15 @@ export default function EmailVerification() {
       OTP: otp.join(""),
       userId: user.id,
     });
-    if (error) return updateNotification('error', error);
+    if (error) return updateNotification("error", error);
 
-    updateNotification('success', message);;
+    updateNotification("success", message);
   };
 
   useEffect(() => {
     inputRef.current?.focus();
   }, [activeOtpIndex]);
 
-  
   useEffect(() => {
     if (!user) navigate("/not-found");
   }, [user]);

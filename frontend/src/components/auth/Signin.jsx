@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAuth, useNotification } from "../../hooks";
 import { commonModalClasses } from "../../utils/theme";
-
 import Container from "../Container";
 import CustomLink from "../CustomLink";
 import FormContainer from "../form/FormContainer";
@@ -28,14 +28,13 @@ export default function Signin() {
     password: "",
   });
 
+  const navigate = useNavigate();
   const { updateNotification } = useNotification();
   const { handleLogin, authInfo } = useAuth();
-  const { isPending } = authInfo;
-
-  console.log(authInfo);
+  const { isPending, isLoggedIn } = authInfo;
 
   const handleChange = ({ target }) => {
-    const { name, value } = target;
+    const { value, name } = target;
     setUserInfo({ ...userInfo, [name]: value });
   };
 
@@ -46,6 +45,11 @@ export default function Signin() {
     if (!ok) return updateNotification("error", error);
     handleLogin(userInfo.email, userInfo.password);
   };
+
+  useEffect(() => {
+    // we want to move our user to somewhere else
+    if (isLoggedIn) navigate("/");
+  }, [isLoggedIn]);
 
   return (
     <FormContainer>
@@ -67,7 +71,7 @@ export default function Signin() {
             name="password"
             type="password"
           />
-          <Submit value="Sign in" busy={isPending}/>
+          <Submit value="Sign in" busy={isPending} />
 
           <div className="flex justify-between">
             <CustomLink to="/auth/forget-password">Forget password</CustomLink>
